@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Trpc from "./api/trpc/[trpc]";
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
+import { useSetRecoilState } from "recoil";
+import { emailCode } from "@/atoms/emailCode";
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,20 +12,32 @@ const Signup: React.FC = () => {
     password: "",
   });
 
+  const setCode = useSetRecoilState(emailCode);
+
   const router = useRouter();
 
+  const sendEmail = api.email.sendEmail.useMutation({
+    onSuccess: (data) => {
+      if (data?.code) {
+        setCode((_prev) => data?.code);
+      }
+    },
+  });
+
   const signup = api.user.signup.useMutation({
-    onSuccess: data => {
-        if (data.code === 201) {
-            router.push('/signin');
-        }
-    }
-  })
+    onSuccess: async (data) => {
+      if (data.code === 201) {
+        router.push("/signin");
+        await sendEmail.mutate({ email: formData.email });
+        router.push(`/verify-email?e=${formData.email}`);
+      }
+    },
+  });
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     await signup.mutate(formData);
-  }
+  };
 
   return (
     <div>
