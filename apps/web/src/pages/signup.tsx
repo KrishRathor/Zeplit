@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import Trpc from "./api/trpc/[trpc]";
+import { api } from "@/utils/api";
+import { useRouter } from "next/router";
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -7,9 +10,19 @@ const Signup: React.FC = () => {
     password: "",
   });
 
+  const router = useRouter();
+
+  const signup = api.user.signup.useMutation({
+    onSuccess: data => {
+        if (data.code === 201) {
+            router.push('/signin');
+        }
+    }
+  })
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    console.log(formData);
+    await signup.mutate(formData);
   }
 
   return (

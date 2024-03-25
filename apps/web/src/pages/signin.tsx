@@ -1,3 +1,5 @@
+import { api } from "@/utils/api";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 
 const SignIn: React.FC = () => {
@@ -6,9 +8,21 @@ const SignIn: React.FC = () => {
     password: "",
   });
 
+  const router = useRouter();
+
+  const signin = api.user.signin.useMutation({
+    onSuccess: data => {
+        if (data.code === 202) {
+            const token = data.token;
+            token && localStorage.setItem('token', token);
+            router.push('/');
+        }
+    }
+  })
+
   const handleLogin = async (e: any) => {
     e.preventDefault();
-    console.log(formData);
+    await signin.mutate(formData);
   }
 
   return (
