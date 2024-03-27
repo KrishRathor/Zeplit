@@ -5,18 +5,33 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { api } from "@/utils/api";
 
 export const Content: React.FC = () => {
+
+  const c = api.kaps.createKap.useMutation({
+    onSuccess: data => {
+      console.log(data);
+    }
+  })
+
   return (
     <div style={{ background: "#0D0D1A" }} className="w-[85vw]">
       <Navbar />
       <div>
         <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
         <div className="m-5 h-[70vh] overflow-y-auto">
+          <button className="text-white" onClick={async () => {
+            await c.mutate({
+              token: 'dfdf',
+              title: 'ffdk'
+            })
+            console.log('first')
+          } } >click</button>
           {
             [1,1,1].map(item => (
               <div className="mt-4" >
-                <Kap title="Zapier" />
+                <Kap title="Zapier" published={true} />
               </div>
             ))
           } 
@@ -79,10 +94,11 @@ const Navbar: React.FC = () => {
 
 interface KapProps {
   title: string;
+  published: boolean
 }
 
 const Kap: React.FC<KapProps> = (props) => {
-  const { title } = props;
+  const { title, published } = props;
 
   return (
     <div
@@ -118,6 +134,7 @@ const Kap: React.FC<KapProps> = (props) => {
             value=""
             className="peer sr-only"
             onChange={(e) => console.log(e.target.checked)}
+            checked={published}
           />
           <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-purple-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-purple-800"></div>
         </label>

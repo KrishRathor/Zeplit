@@ -40,6 +40,11 @@ export const api = createTRPCNext<AppRouter>({
            */
           transformer: superjson,
           url: `${getBaseUrl()}/api/trpc`,
+          headers() {
+            return {
+              authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
         }),
       ],
     };
