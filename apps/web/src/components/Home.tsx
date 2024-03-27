@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Person2Icon from "@mui/icons-material/Person2";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -6,28 +6,53 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { api } from "@/utils/api";
+import { KapsType } from "@/utils/enums";
 
 export const Content: React.FC = () => {
 
-  const c = api.kaps.createKap.useMutation({
+  const [kaps, setKaps] = useState<KapsType[] | null>();
+  
+  const getKaps = api.kaps.getAllKapsOfUser.useMutation({
+    onSuccess: data => {
+      if (data.code === 200) {
+        setKaps(_prev => data.kaps);
+      }
+    }
+  })
+
+  const createKap = api.kaps.createKap.useMutation({
     onSuccess: data => {
       console.log(data);
     }
   })
 
+  useEffect(() => {
+    const kap = async () => {
+      await getKaps.mutate();
+    }
+    kap();
+  }, [])
+
   return (
     <div style={{ background: "#0D0D1A" }} className="w-[85vw]">
       <Navbar />
       <div>
+        <div className="flex justify-between w-[75vw] mx-auto" >
         <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
+        <div className="border" onClick={async () => {
+          await createKap.mutate({
+            title: 'Zapier'
+          })
+        }} >
+          <Button />
+        </div>
+        </div>
         <div className="m-5 h-[70vh] overflow-y-auto">
-          {
-            [1,1,1].map(item => (
-              <div className="mt-4" >
-                <Kap title="Zapier" published={true} />
-              </div>
-            ))
-          } 
+          {kaps && kaps.map((item) => (
+            <div key={item.id} className="mt-4">
+              <Kap title={item.title} id={item.id} published={item.published} />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -86,17 +111,25 @@ const Navbar: React.FC = () => {
 };
 
 interface KapProps {
-  title: string;
-  published: boolean
+  title: string,
+  published: boolean,
+  id: number
 }
 
 const Kap: React.FC<KapProps> = (props) => {
-  const { title, published } = props;
+  const { title, published, id } = props;
+
+  const updateKapPublish = api.kaps.togglePublishStatusOfKap.useMutation({
+    onSuccess: data => {
+      console.log(data);
+    }
+  })
 
   return (
     <div
       className="mx-auto flex w-[80%] items-center justify-between rounded-md border p-4"
       style={{ background: "#151521" }}
+      key={id}
     >
       <div className="flex w-[30%] items-center justify-between">
         <div className="flex">
@@ -126,12 +159,28 @@ const Kap: React.FC<KapProps> = (props) => {
             type="checkbox"
             value=""
             className="peer sr-only"
-            onChange={(e) => console.log(e.target.checked)}
+            onChange={async (e) => {
+              await updateKapPublish.mutate({
+                id: id,
+                published: e.target.checked
+              })
+            }}
             checked={published}
           />
           <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-purple-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-purple-800"></div>
         </label>
       </div>
     </div>
+  );
+};
+
+const Button: React.FC = () => {
+  return (
+    <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+        New Kap
+      </span>
+    </button>
   );
 };
