@@ -15,7 +15,7 @@ const Home: React.FC = () => {
     }, [])
 
     return (
-        <div className="flex h-screen w-screen" >
+        <div className="flex h-screen w-screen m-0 p-0 overflow-y-auto" >
             <Sidebar />
             <Content />
         </div>

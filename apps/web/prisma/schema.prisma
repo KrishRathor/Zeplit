@@ -19,3 +19,11 @@ model User {
     emailVerified Boolean @default(false)
     image String?
 }
+
+model Kap {
+    id Int @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    owner String
+    title String
+    published Boolean @default(true)
+}
