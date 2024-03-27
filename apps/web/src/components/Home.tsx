@@ -21,13 +21,6 @@ export const Content: React.FC = () => {
       <div>
         <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
         <div className="m-5 h-[70vh] overflow-y-auto">
-          <button className="text-white" onClick={async () => {
-            await c.mutate({
-              token: 'dfdf',
-              title: 'ffdk'
-            })
-            console.log('first')
-          } } >click</button>
           {
             [1,1,1].map(item => (
               <div className="mt-4" >
