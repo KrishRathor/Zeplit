@@ -60,7 +60,7 @@ const Signup: React.FC = () => {
                 />
               </svg>
             </div>
-            Zeplit
+            Kapier
           </div>
         </a>
         <div className="relative mt-12 w-full max-w-lg sm:mt-10">
@@ -166,9 +166,9 @@ const Signup: React.FC = () => {
                 <div className="mt-4 flex items-center justify-end gap-x-2">
                   <a
                     className="focus-visible:ring-ring hover:bg-accent inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 hover:ring hover:ring-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                    href="/login"
+                    href="/signin"
                   >
-                    Login
+                    SignIn
                   </a>
                   <button
                     className="inline-flex h-10 items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-black transition duration-300 hover:bg-black hover:text-white hover:ring hover:ring-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"

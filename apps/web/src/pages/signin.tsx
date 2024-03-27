@@ -15,7 +15,7 @@ const SignIn: React.FC = () => {
         if (data.code === 202) {
             const token = data.token;
             token && localStorage.setItem('token', token);
-            router.push('/');
+            router.push('/home');
         }
     }
   })
@@ -46,7 +46,7 @@ const SignIn: React.FC = () => {
                 />
               </svg>
             </div>
-            Zeplit
+            Kapier
           </div>
         </a>
         <div className="relative mt-12 w-full max-w-lg sm:mt-10">
