@@ -37,6 +37,7 @@
     "react-dom": "18.2.0",
     "react-element-to-jsx-string": "^15.0.0",
     "react-toastify": "^10.0.5",
+    "reactflow": "^11.10.4",
     "recoil": "^0.7.7",
     "superjson": "^2.2.1",
     "tailwind-merge": "^2.2.2",

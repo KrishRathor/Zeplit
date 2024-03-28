@@ -130,6 +130,7 @@ const Kap: React.FC<KapProps> = (props) => {
   const { title, published, id } = props;
   const [toggleStatus, setToggleStatus] = useState<boolean>(published);
   const setFetchKapsToggle = useSetRecoilState(fetchKaps);
+  const router = useRouter();
 
   const updateKapPublish = api.kaps.togglePublishStatusOfKap.useMutation({
     onSuccess: (data) => {
@@ -172,14 +173,16 @@ const Kap: React.FC<KapProps> = (props) => {
             />
           </div>
         </div>
-        <div className="cursor-pointer">
+        <div className="cursor-pointer" onClick={() => {
+          router.push(`/kaps?id=${id}`)
+        }} >
           <p className="text-2xl text-white">{title}</p>
         </div>
         <div></div>
       </div>
       <div className="flex w-[10%] justify-between">
         <div
-          className="cursor-pointer text-white"
+          className="cursor-pointer text-red-600"
           onClick={async (_e) => {
             await deleteKap.mutate({ id });
           }}
