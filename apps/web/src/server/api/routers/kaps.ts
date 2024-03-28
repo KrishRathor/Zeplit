@@ -32,6 +32,23 @@ export const kapsRouter = createTRPCRouter({
                     }
                 }
 
+                const kap = await prisma.kap.findFirst({
+                    where: {
+                        AND: [
+                            { owner: username },
+                            { title: title }
+                        ]
+                    }
+                })
+
+                if (kap) {
+                    return {
+                        code: HttpStatusCode.BadRequest,
+                        message: 'Kap with same name exist',
+                        kap: kap
+                    }
+                }
+
                 const createKap = await prisma.kap.create({
                     data: {
                         title: title,

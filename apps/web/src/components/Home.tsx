@@ -7,54 +7,64 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { api } from "@/utils/api";
 import { KapsType } from "@/utils/enums";
+import { Popup } from "./Popup";
 
 export const Content: React.FC = () => {
-
   const [kaps, setKaps] = useState<KapsType[] | null>();
-  
-  const getKaps = api.kaps.getAllKapsOfUser.useMutation({
-    onSuccess: data => {
-      if (data.code === 200) {
-        setKaps(_prev => data.kaps);
-      }
-    }
-  })
+  const [showPopup, setShowPopup] = useState<boolean>(false);
 
-  const createKap = api.kaps.createKap.useMutation({
-    onSuccess: data => {
-      console.log(data);
-    }
-  })
+  const getKaps = api.kaps.getAllKapsOfUser.useMutation({
+    onSuccess: (data) => {
+      if (data.code === 200) {
+        const sortedKaps = data.kaps?.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+        );
+        setKaps((_prev) => sortedKaps);
+      }
+    },
+  });
+
+  const togglePopup = () => {
+    setShowPopup(prev => !prev);
+  }
 
   useEffect(() => {
     const kap = async () => {
       await getKaps.mutate();
-    }
+    };
     kap();
-  }, [])
+  }, [showPopup]);
 
   return (
     <div style={{ background: "#0D0D1A" }} className="w-[85vw]">
       <Navbar />
       <div>
-        <div className="flex justify-between w-[75vw] mx-auto" >
-        <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
-        <div className="border" onClick={async () => {
-          await createKap.mutate({
-            title: 'Zapier'
-          })
-        }} >
-          <Button />
-        </div>
+        <div className="mx-auto flex w-[75vw] justify-between">
+          <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
+          <div
+            className="border"
+            onClick={togglePopup}
+          >
+            <Button />
+          </div>
         </div>
         <div className="m-5 h-[70vh] overflow-y-auto">
-          {kaps && kaps.map((item) => (
-            <div key={item.id} className="mt-4">
-              <Kap title={item.title} id={item.id} published={item.published} />
-            </div>
-          ))}
+          {kaps &&
+            kaps.map((item) => (
+              <div key={item.id} className="mt-4">
+                <Kap
+                  title={item.title}
+                  id={item.id}
+                  published={item.published}
+                />
+              </div>
+            ))}
         </div>
       </div>
+      {
+        showPopup && <Popup onClose={togglePopup} />
+      }
     </div>
   );
 };
@@ -111,19 +121,19 @@ const Navbar: React.FC = () => {
 };
 
 interface KapProps {
-  title: string,
-  published: boolean,
-  id: number
+  title: string;
+  published: boolean;
+  id: number;
 }
 
 const Kap: React.FC<KapProps> = (props) => {
   const { title, published, id } = props;
 
   const updateKapPublish = api.kaps.togglePublishStatusOfKap.useMutation({
-    onSuccess: data => {
+    onSuccess: (data) => {
       console.log(data);
-    }
-  })
+    },
+  });
 
   return (
     <div
@@ -162,8 +172,8 @@ const Kap: React.FC<KapProps> = (props) => {
             onChange={async (e) => {
               await updateKapPublish.mutate({
                 id: id,
-                published: e.target.checked
-              })
+                published: e.target.checked,
+              });
             }}
             checked={published}
           />
