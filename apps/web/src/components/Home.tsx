@@ -12,15 +12,18 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { toast } from "react-toastify";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { fetchKaps } from "@/atoms/fetchKaps";
+import { HorizontalSkeleton } from "./HorizontalSkeleton";
 
 export const Content: React.FC = () => {
   const [kaps, setKaps] = useState<KapsType[] | null>();
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [kapsLoading, setKapsLoading] = useState<boolean>(true);
   const fetchKapsToggle = useRecoilValue(fetchKaps);
 
   const getKaps = api.kaps.getAllKapsOfUser.useMutation({
     onSuccess: (data) => {
       if (data.code === 200) {
+        setKapsLoading(false);
         const sortedKaps = data.kaps?.sort(
           (a, b) =>
             new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -51,6 +54,9 @@ export const Content: React.FC = () => {
             <Button />
           </div>
         </div>
+        {
+          kapsLoading && <div className="mx-auto w-[30vw]"><HorizontalSkeleton /></div>
+        }
         <div className="m-5 h-[70vh] overflow-y-auto">
           {kaps &&
             kaps.map((item) => (

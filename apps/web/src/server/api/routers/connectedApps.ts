@@ -2,12 +2,15 @@ import { z } from "zod";
 import { createTRPCRouter, isUserAuthenticated, publicProcedure } from "../trpc";
 import { google } from "googleapis"
 import { HttpStatusCode } from "../HttpStatusCode";
+import { PrismaClient } from "@prisma/client";
 
 const oauth2Client = new google.auth.OAuth2({
     clientId: process.env.OauthClientID,
     clientSecret: process.env.OauthClientSecret,
-    redirectUri: 'http://localhost:3000/getAuthCode'
+    redirectUri: process.env.RedirectURI
 })
+
+const prisma = new PrismaClient();
 
 export const connectedAppsRouter = createTRPCRouter({
     gmailConnect: publicProcedure
@@ -31,25 +34,47 @@ export const connectedAppsRouter = createTRPCRouter({
         .input(z.object({
             code: z.string()
         }))
+        .use(isUserAuthenticated)
         .mutation(async opts => {
-            const { code } = opts.input;      
+            const { code } = opts.input;  
+            const { username } = opts.ctx;    
             const { tokens } = await oauth2Client.getToken(code);
             console.log(code, tokens);
             const { access_token, refresh_token } = tokens;
+
+            const user = await prisma.user.findFirst({
+                where: {
+                    username: username
+                }
+            })
+
+            if (!user) {
+                return {
+                    code: HttpStatusCode.NotFound,
+                    message: 'User not found'
+                }
+            }
+
+            const userGoogleToken = await prisma.userGoogleToken.findFirst({
+                where: {
+                    username: username
+                }
+            })
+
+            if (!userGoogleToken && access_token && refresh_token) {
+                const createUserGoogleToken = await prisma.userGoogleToken.create({
+                    data: {
+                        username: username,
+                        accessToken: access_token,
+                        refreshToken: refresh_token
+                    }
+                })
+            }
+
             oauth2Client.setCredentials({
                 access_token: access_token,
                 refresh_token: refresh_token
             })
-
-            const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
-
-                // Example: Get user's profile
-            const profile = await gmail.users.getProfile({ userId: 'me' });
-            console.log('User profile:', profile.data);
-
-            return {
-                profile
-            }
 
         })
 })

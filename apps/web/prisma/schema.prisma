@@ -27,3 +27,11 @@ model Kap {
     title String
     published Boolean @default(true)
 }
+
+model UserGoogleToken {
+    id Int @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    username String @unique
+    accessToken String @unique
+    refreshToken String @unique
+}
