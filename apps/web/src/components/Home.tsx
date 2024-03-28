@@ -8,10 +8,15 @@ import Image from "next/image";
 import { api } from "@/utils/api";
 import { KapsType } from "@/utils/enums";
 import { Popup } from "./Popup";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { toast } from "react-toastify";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { fetchKaps } from "@/atoms/fetchKaps";
 
 export const Content: React.FC = () => {
   const [kaps, setKaps] = useState<KapsType[] | null>();
   const [showPopup, setShowPopup] = useState<boolean>(false);
+  const fetchKapsToggle = useRecoilValue(fetchKaps);
 
   const getKaps = api.kaps.getAllKapsOfUser.useMutation({
     onSuccess: (data) => {
@@ -26,15 +31,15 @@ export const Content: React.FC = () => {
   });
 
   const togglePopup = () => {
-    setShowPopup(prev => !prev);
-  }
+    setShowPopup((prev) => !prev);
+  };
 
   useEffect(() => {
     const kap = async () => {
       await getKaps.mutate();
     };
     kap();
-  }, [showPopup]);
+  }, [showPopup, fetchKapsToggle]);
 
   return (
     <div style={{ background: "#0D0D1A" }} className="w-[85vw]">
@@ -42,10 +47,7 @@ export const Content: React.FC = () => {
       <div>
         <div className="mx-auto flex w-[75vw] justify-between">
           <div className="ml-4 font-serif text-4xl text-white">Workflows</div>
-          <div
-            className="border"
-            onClick={togglePopup}
-          >
+          <div className="" onClick={togglePopup}>
             <Button />
           </div>
         </div>
@@ -62,9 +64,7 @@ export const Content: React.FC = () => {
             ))}
         </div>
       </div>
-      {
-        showPopup && <Popup onClose={togglePopup} />
-      }
+      {showPopup && <Popup onClose={togglePopup} />}
     </div>
   );
 };
@@ -128,10 +128,24 @@ interface KapProps {
 
 const Kap: React.FC<KapProps> = (props) => {
   const { title, published, id } = props;
+  const [toggleStatus, setToggleStatus] = useState<boolean>(published);
+  const setFetchKapsToggle = useSetRecoilState(fetchKaps);
 
   const updateKapPublish = api.kaps.togglePublishStatusOfKap.useMutation({
     onSuccess: (data) => {
-      console.log(data);
+      if (data.code !== 200) {
+        toast(data.message);
+      }
+    },
+  });
+
+  const deleteKap = api.kaps.deleteKap.useMutation({
+    onSuccess: (data) => {
+      if (data.code !== 200) {
+        toast(data.message);
+      } else {
+        setFetchKapsToggle(prev => !prev);
+      }
     },
   });
 
@@ -163,22 +177,33 @@ const Kap: React.FC<KapProps> = (props) => {
         </div>
         <div></div>
       </div>
-      <div>
-        <label className="me-5 inline-flex cursor-pointer items-center">
-          <input
-            type="checkbox"
-            value=""
-            className="peer sr-only"
-            onChange={async (e) => {
-              await updateKapPublish.mutate({
-                id: id,
-                published: e.target.checked,
-              });
-            }}
-            checked={published}
-          />
-          <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-purple-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-purple-800"></div>
-        </label>
+      <div className="flex w-[10%] justify-between">
+        <div
+          className="cursor-pointer text-white"
+          onClick={async (_e) => {
+            await deleteKap.mutate({ id });
+          }}
+        >
+          <DeleteOutlineIcon className=" h-[30px] w-[30px]" />
+        </div>
+        <div>
+          <label className="me-5 inline-flex cursor-pointer items-center">
+            <input
+              type="checkbox"
+              value=""
+              className="peer sr-only"
+              onChange={async (e) => {
+                await updateKapPublish.mutate({
+                  id: id,
+                  published: e.target.checked,
+                });
+                setToggleStatus((prev) => !prev);
+              }}
+              checked={toggleStatus}
+            />
+            <div className="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-purple-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-purple-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-purple-800"></div>
+          </label>
+        </div>
       </div>
     </div>
   );

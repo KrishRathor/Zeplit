@@ -169,5 +169,54 @@ export const kapsRouter = createTRPCRouter({
             } finally {
                 await prisma.$disconnect();
             }
+        }),
+    deleteKap: publicProcedure
+        .input(z.object({
+            id: z.number()
+        }))
+        .use(isUserAuthenticated)
+        .mutation(async opts => {
+            const { id } = opts.input;
+            const { username } = opts.ctx;
+
+            try {
+                
+                const user = await prisma.user.findFirst({
+                    where: {
+                        username: username
+                    }
+                })
+
+                if (!user) {
+                    return {
+                        code: HttpStatusCode.NotFound,
+                        message: 'User not found',
+                        kap: null
+                    }
+                }
+
+                const deleteKap = await prisma.kap.delete({
+                    where: {
+                        id: id
+                    }
+                })
+
+                return {
+                    code: HttpStatusCode.OK,
+                    message: 'kap deleted',
+                    kap: deleteKap
+                }
+
+            } catch (err) {
+                console.log(err);
+                return {
+                    code: HttpStatusCode.InternalServerError,
+                    message: 'Internal Server Error',
+                    kap: null
+                }
+            } finally {
+                await prisma.$disconnect();
+            }
+
         })
 })

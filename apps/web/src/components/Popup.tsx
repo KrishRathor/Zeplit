@@ -1,13 +1,19 @@
+import { fetchKaps } from "@/atoms/fetchKaps";
 import { api } from "@/utils/api";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 export const Popup = ({ onClose }: any) => {
     const [kapName, setKapName] = useState<string>("");
+    const toggleKaps = useSetRecoilState(fetchKaps);
 
     const createKap = api.kaps.createKap.useMutation({
         onSuccess: data => {
-            if (data.code === 201) {
-
+            if (data.code !== 201) {
+                toast(data.message);
+            } else {
+                toggleKaps(prev => !prev);
             }
         }
     })

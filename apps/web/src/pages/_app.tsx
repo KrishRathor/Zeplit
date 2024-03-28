@@ -5,6 +5,8 @@ import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
 import { RecoilRoot } from "recoil";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,6 +18,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
       <RecoilRoot>
         <Component {...pageProps} />
       </RecoilRoot>
+      <ToastContainer />
     </main>
   );
 };
